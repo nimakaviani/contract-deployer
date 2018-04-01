@@ -15,9 +15,6 @@ const password = flags.password
 const provider = flags.provider
 const contractPath = args.contract
 
-console.log(address, password, provider, contractPath)
-
-
 const Web3 = require('web3')
 if (typeof web3 !== 'undefined') {
   web3 = new Web3(web3.currentProvider);
@@ -40,15 +37,18 @@ if (!fs.existsSync(contractPath)) {
 
 fs.readFile(contractPath, {encoding: 'utf-8'}, function(err,data){
     if (!err) {
-      runDeployment(data)
+      var solc = require('solc')
+      var output = solc.compile(data, 1)
+      for(var contractName in output.contracts){
+        runDeployment(output.contracts[contractName])
+      }
     } else {
       console.log(err);
       process.exit()
     }
 })
 
-function runDeployment(data){
-  eval(data)
+function runDeployment(contract){
   web3.eth.personal.getAccounts()
   .then(data => {
     console.log("using account " + address)
@@ -56,10 +56,11 @@ function runDeployment(data){
   })
   .then(() => {
     console.log("unlocked account. estimating gas...");
-    var storageContractAbi = storageOutput.contracts['contract.sol:Storage'].abi
-    var contract = new web3.eth.Contract(JSON.parse(storageContractAbi))
-    var compiled = "0x" + storageOutput.contracts['contract.sol:Storage'].bin
-    deploy = contract.deploy({
+    var contractAbi = contract.interface
+    console.log("> ABI: " + contractAbi)
+    var contractInterface = new web3.eth.Contract(JSON.parse(contractAbi))
+    var compiled = "0x" + contract.bytecode
+    deploy = contractInterface.deploy({
       data: compiled,
       arguments: [123]
     });
