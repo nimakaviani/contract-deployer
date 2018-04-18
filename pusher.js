@@ -52,7 +52,7 @@ function runDeployment(contract){
   web3.eth.personal.getAccounts()
   .then(data => {
     console.log("using account " + address)
-    return web3.eth.personal.unlockAccount(address, password)
+    return web3.eth.personal.unlockAccount(address, '')
   })
   .then(() => {
     console.log("unlocked account. estimating gas...");
