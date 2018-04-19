@@ -77,6 +77,8 @@ function runDeployment(contract){
       console.log("transaction hash: " + hash);
       web3.eth.getTransaction(hash)
       .then(transaction => console.log("gasPrice was: " + transaction.gasPrice));
+      web3.eth.getTransactionReceipt(hash)
+      .then(transactionReceipt => console.log("contract address: " + transactionReceipt.contractAddress));
     })
   })
   .then(() => console.log("done"))
